@@ -1,0 +1,1 @@
+# packer-virtualbox-atlas-template
