@@ -1,0 +1,84 @@
+{
+  "variables": {
+      "atlas_token": "{{env 'atlas_token'}}"
+  },
+
+  "push": {
+      "name": "hyperfocus/utopic-vb",
+      "token": "{{user 'atlas_token'}}"
+  },
+
+  "provisioners": [
+
+      {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+      "scripts": [
+        "provision/build_time.sh",
+        "provision/apt.sh",
+        "provision/sudo.sh",
+        "provision/vagrant.sh",
+        "provision/vbox.sh",
+        "provision/cleanup.sh",
+        "provision/ansible.sh"
+      ]}
+  ],
+
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<esc><esc><enter><wait>",
+        "/install/vmlinuz noapic preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg <wait>",
+        "debian-installer=en_US auto locale=en_US kbd-chooser/method=us <wait>",
+        "hostname={{ .Name }} <wait>",
+        "fb=false debconf/frontend=noninteractive <wait>",
+        "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=us keyboard-configuration/variant=us console-setup/ask_detect=false <wait>",
+        "initrd=/install/initrd.gz -- <enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": 20480,
+      "guest_os_type": "Ubuntu_64",
+      "headless": "false",
+      "http_directory": "http",
+      "iso_checksum": "91BD1CFBA65417BFA04567E4F64B5C55",
+      "iso_checksum_type": "md5",
+      "iso_url": "http://releases.ubuntu.com/14.10/ubuntu-14.10-server-amd64.iso",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "echo 'shutdown -P now' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "ubuntu-14.10-server-amd64",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "512"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "1"
+        ]
+      ]
+    }
+  ],
+
+  "post-processors": [{
+
+    "type": "vagrant",
+      "output": "builds/ubuntu-14.10-server-amd64.box",
+
+    "type": "atlas",
+      "artifact": "hyperfocus/utopic-vb",
+      "artifact_type": "virtualbox",
+      "metadata": {
+        "created_at": "{{timestamp}}"
+      }
+  }]
+}
