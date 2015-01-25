@@ -1,6 +1,6 @@
 {
   "variables": {
-      "atlas_token": "{{env 'atlas_token'}}"
+      "atlas_token": "{{env 'ATLAS_TOKEN'}}"
   },
 
   "push": {
